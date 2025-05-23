@@ -28,7 +28,6 @@ if st.button("🚀 Processar"):
             # Verifica se tem números no final (se não tem, é quebra de linha)
             numeros = re.findall(r'[\d\.,]+', linha_check)
             if len(numeros) >= 3:
-                # Linha completa → soma com anterior se tinha algo acumulado
                 if linha_acumulada:
                     linha_completa = linha_acumulada + " " + linha_check
                     linhas_corrigidas.append(linha_completa.strip())
@@ -36,10 +35,8 @@ if st.button("🚀 Processar"):
                 else:
                     linhas_corrigidas.append(linha_check.strip())
             else:
-                # Linha quebrada → acumula
                 linha_acumulada += " " + linha_check
 
-        # Caso tenha sobrado uma linha no acumulado
         if linha_acumulada:
             linhas_corrigidas.append(linha_acumulada.strip())
 
@@ -55,7 +52,6 @@ if st.button("🚀 Processar"):
                 except:
                     total = 0.0
 
-                # Limpa os números finais pra pegar a descrição
                 descricao = linha
                 for num in numeros[-3:]:
                     descricao = descricao.rsplit(num, 1)[0]
@@ -91,9 +87,16 @@ if st.button("🚀 Processar"):
         st.success("✅ Processamento concluído!")
 
         st.subheader("📊 Resultado Consolidado:")
-        st.dataframe(resultado)
 
-        # 💾 Download Excel
+        # 🔧 Formatar os valores no padrão brasileiro (para exibição na interface)
+        resultado_exibicao = resultado.copy()
+        resultado_exibicao['Total'] = resultado_exibicao['Total'].apply(
+            lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        )
+
+        st.dataframe(resultado_exibicao)
+
+        # 💾 Download Excel (mantém números corretos para cálculos)
         def to_excel(df):
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
