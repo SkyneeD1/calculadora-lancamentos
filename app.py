@@ -86,8 +86,15 @@ if st.button("🚀 Processar"):
 
         st.subheader("📊 Resultado Consolidado:")
 
+        # 🔢 Calcular o total geral
+        total_geral = resultado['Total'].sum()
+
+        # ➕ Adicionar uma linha de total no dataframe de exibição
+        linha_total = pd.DataFrame([['TOTAL GERAL', total_geral]], columns=['Verba Consolidada', 'Total'])
+        resultado_com_total = pd.concat([resultado, linha_total], ignore_index=True)
+
         # 🔧 Formatar os valores no padrão brasileiro (apenas na interface)
-        resultado_exibicao = resultado.copy()
+        resultado_exibicao = resultado_com_total.copy()
         resultado_exibicao['Total'] = resultado_exibicao['Total'].apply(
             lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
