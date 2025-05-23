@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import re
-from io import BytesIO
 
 st.set_page_config(page_title="Lançamentos", page_icon="🧠", layout="centered")
 
@@ -25,7 +24,6 @@ if st.button("🚀 Processar"):
             if any(x in linha_check.upper() for x in ["CÁLCULO LIQUIDADO", "VERSÃO", "PÁG"]):
                 continue  # Ignorar linhas de rodapé
 
-            # Verifica se tem números no final (se não tem, é quebra de linha)
             numeros = re.findall(r'[\d\.,]+', linha_check)
             if len(numeros) >= 3:
                 if linha_acumulada:
@@ -88,26 +86,10 @@ if st.button("🚀 Processar"):
 
         st.subheader("📊 Resultado Consolidado:")
 
-        # 🔧 Formatar os valores no padrão brasileiro (para exibição na interface)
+        # 🔧 Formatar os valores no padrão brasileiro (apenas na interface)
         resultado_exibicao = resultado.copy()
         resultado_exibicao['Total'] = resultado_exibicao['Total'].apply(
             lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
 
         st.dataframe(resultado_exibicao)
-
-        # 💾 Download Excel (mantém números corretos para cálculos)
-        def to_excel(df):
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='Consolidado')
-            return output.getvalue()
-
-        excel = to_excel(resultado)
-
-        st.download_button(
-            label="📥 Baixar Excel Consolidado",
-            data=excel,
-            file_name="consolidado.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
